@@ -28,17 +28,15 @@ spec:
         stage('Security Scan') {
             steps {
                 container('checkov') {
-                    // checkov busca archivos de infraestructura. 
-                    // Como aún no tenemos Terraform, esto probablemente dará un warning
-                    // de "no se encontraron archivos", pero probará que la herramienta corre.
-                    sh 'checkov --version'
+                    sh 'checkov -d terraform/test'
                 }
             }
         }
         stage('Lint Infrastructure') {
             steps {
                 container('tflint') {
-                    sh 'tflint --version'
+                    sh 'tflint --init'
+                    sh 'tflint'
                 }
             }
         }
