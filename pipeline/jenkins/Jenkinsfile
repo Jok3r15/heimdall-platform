@@ -23,13 +23,14 @@ spec:
         stage('Checkout') {
             steps {
                 checkout scm
+                sh 'ls -R'
             }
         }
         stage('Security Scan') {
             steps {
                 container('checkov') {
-                    sh 'checkov -d terraform/test'
-                }
+                sh 'checkov -d infrastructure/terraform/test'
+              }
             }
         }
         stage('Lint Infrastructure') {
