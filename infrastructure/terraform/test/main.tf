@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "b" {
-  bucket = "my-hardened-bucket"
+  bucket = "my-hardened-bucket-unique-2026"
 }
 
 resource "aws_s3_bucket_versioning" "b_versioning" {
@@ -29,7 +29,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "b_encryption" {
 resource "aws_s3_bucket_lifecycle_configuration" "b_lifecycle" {
   bucket = aws_s3_bucket.b.id
   rule {
-    id     = "log-expiry"
+    id     = "cleanup"
     status = "Enabled"
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
