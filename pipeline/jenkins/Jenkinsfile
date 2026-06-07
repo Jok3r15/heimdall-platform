@@ -27,9 +27,9 @@ spec:
             }
         }
         stage('Security Scan') {
-    steps {
-        container('checkov') {
-            sh 'checkov -d pipeline/jenkins/terraform/test'
+           steps {
+               container('checkov') {
+                   sh 'checkov -d infrastructure/terraform/test'
         }
     }
 }
