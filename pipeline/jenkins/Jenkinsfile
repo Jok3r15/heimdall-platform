@@ -48,9 +48,9 @@ spec:
         stage('Terraform Plan') {
             steps {
                 container('terraform') {
-                    // Aquí usamos la credencial que acabas de crear
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
                         sh '''
+                        cd infrastructure/terraform/test
                         terraform init
                         terraform plan
                         '''
