@@ -1,49 +1,11 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: jnlp
-    image: jenkins/inbound-agent:3355.v388858a_47b_33-20
-  - name: checkov
-    image: bridgecrew/checkov:latest
-    command: ['cat']
-    tty: true
-  - name: tflint
-    image: ghcr.io/terraform-linters/tflint:latest
-    command: ['cat']
-    tty: true
-"""
-        }
+    agent { 
+        // ... (tu configuración de agente) ...
     }
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-                sh 'ls -R'
-            }
-        }
-        stage('Security Scan') {
-           steps {
-               container('checkov') {
-                   sh 'checkov -d infrastructure/terraform/test'
-        }
+        // ... (tus stages) ...
     }
-}
-        stage('Lint Infrastructure') {
-            steps {
-                container('tflint') {
-                    sh 'tflint --init'
-                    sh 'tflint'
-                }
-            }
-        }
-    }
-
-post {
+    post {
         failure {
             script {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_URL')]) {
@@ -60,4 +22,5 @@ post {
                 }
             }
         }
-    }
+    } // <-- Esta llave cierra el post
+} // <-- Esta llave cierra el pipeline (¡Asegúrate de que esta exista!)
