@@ -1,47 +1,46 @@
 pipeline {
- 
-    agent any
-
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: jnlp
+    image: jenkins/inbound-agent:3355.v388858a_47b_33-20
+  - name: checkov
+    image: bridgecrew/checkov:latest
+    command: ['cat']
+    tty: true
+  - name: tflint
+    image: ghcr.io/terraform-linters/tflint:latest
+    command: ['cat']
+    tty: true
+"""
+        }
+    }
     stages {
         stage('Checkout') {
             steps {
-                echo '📦 Clonando el repositorio...'
- 
+                checkout scm
             }
         }
-        
-        stage('Build & Test') {
-            steps {
-                echo '🛠️ Construyendo la aplicación y ejecutando pruebas unitarias...'
- 
-            }
-        }
-        
         stage('Security Scan') {
             steps {
-                echo '🔐 Escaneando vulnerabilidades en el código y la infraestructura...'
- 
+                container('checkov') {
+                    // checkov busca archivos de infraestructura. 
+                    // Como aún no tenemos Terraform, esto probablemente dará un warning
+                    // de "no se encontraron archivos", pero probará que la herramienta corre.
+                    sh 'checkov --version'
+                }
             }
         }
-        
-        stage('Deploy to Dev') {
+        stage('Lint Infrastructure') {
             steps {
-                echo '🚀 Desplegando en el entorno de desarrollo...'
- 
+                container('tflint') {
+                    sh 'tflint --version'
+                }
             }
-        }
-    }
-    
-    post {
-        always {
-            echo '🧹 Limpiando el espacio de trabajo...'
-            //cleanWs()
-        }
-        success {
-            echo '✅ ¡Pipeline ejecutado con éxito!'
-        }
-        failure {
-            echo '❌ El pipeline falló. Revisar los logs.'
         }
     }
 }
