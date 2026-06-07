@@ -1,0 +1,9 @@
+terraform {
+  backend "s3" {
+    bucket         = "mi-bucket-de-estados-devops" # Debes crear este bucket en AWS
+    key            = "heimdall/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-lock-table"        # Para evitar conflictos si 2 personas despliegan a la vez
+  }
+}
