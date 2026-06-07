@@ -47,16 +47,17 @@ post {
         failure {
             script {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_URL')]) {
-                    sh 'curl -X POST -H "Content-type: application/json" --data \'{"text":"🚨 *Fallo en Pipeline:* ${env.JOB_NAME} #${env.BUILD_NUMBER}. Revisa: ${env.BUILD_URL}"}\' $SLACK_URL'
+                    def msg = "🚨 *Fallo en Pipeline* | Job: ${env.JOB_NAME} | Build: #${env.BUILD_NUMBER}\n🔗 <${env.BUILD_URL}|Ver detalles en Jenkins>"
+                    sh "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"${msg}\"}' \$SLACK_URL"
                 }
             }
         }
         success {
             script {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_URL')]) {
-                    sh 'curl -X POST -H "Content-type: application/json" --data \'{"text":"✅ *Pipeline Exitoso:* ${env.JOB_NAME} #${env.BUILD_NUMBER}."}\' $SLACK_URL'
+                    def msg = "✅ *Pipeline Exitoso* | Job: ${env.JOB_NAME} | Build: #${env.BUILD_NUMBER}\n🔗 <${env.BUILD_URL}|Ver reporte completo>"
+                    sh "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"${msg}\"}' \$SLACK_URL"
                 }
             }
         }
     }
-}
