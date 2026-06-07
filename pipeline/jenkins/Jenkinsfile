@@ -1,0 +1,47 @@
+pipeline {
+ 
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '📦 Clonando el repositorio...'
+ 
+            }
+        }
+        
+        stage('Build & Test') {
+            steps {
+                echo '🛠️ Construyendo la aplicación y ejecutando pruebas unitarias...'
+ 
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                echo '🔐 Escaneando vulnerabilidades en el código y la infraestructura...'
+ 
+            }
+        }
+        
+        stage('Deploy to Dev') {
+            steps {
+                echo '🚀 Desplegando en el entorno de desarrollo...'
+ 
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo '🧹 Limpiando el espacio de trabajo...'
+            cleanWs()
+        }
+        success {
+            echo '✅ ¡Pipeline ejecutado con éxito!'
+        }
+        failure {
+            echo '❌ El pipeline falló. Revisar los logs.'
+        }
+    }
+}
