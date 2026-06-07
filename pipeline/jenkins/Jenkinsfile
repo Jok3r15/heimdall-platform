@@ -9,6 +9,10 @@ metadata:
     jenkins/label: "heimdall-core-pipeline"
 spec:
   containers:
+  - name: terraform
+    image: hashicorp/terraform:latest
+    command: ['cat']
+    tty: true
   - name: checkov
     image: bridgecrew/checkov:latest
     command: ['cat']
@@ -38,6 +42,19 @@ spec:
                 container('tflint') {
                     sh 'tflint --init'
                     sh 'tflint'
+                }
+            }
+        }
+        stage('Terraform Plan') {
+            steps {
+                container('terraform') {
+                    // Aquí usamos la credencial que acabas de crear
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        sh '''
+                        terraform init
+                        terraform plan
+                        '''
+                    }
                 }
             }
         }
