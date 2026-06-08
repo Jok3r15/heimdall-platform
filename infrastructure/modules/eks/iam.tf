@@ -1,7 +1,6 @@
-# IAM Role for EKS Cluster to interact with AWS services
+# Create the IAM role for the EKS cluster control plane
 resource "aws_iam_role" "eks_cluster" {
   name = "heimdall-eks-role"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -12,7 +11,7 @@ resource "aws_iam_role" "eks_cluster" {
   })
 }
 
-# Attach standard EKS policy to the role
+# Attach the required EKS cluster policy to the role
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_cluster.name
