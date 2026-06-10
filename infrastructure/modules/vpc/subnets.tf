@@ -1,3 +1,8 @@
+# Declare the data source to fetch available AZs
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 resource "aws_subnet" "private" {
   count                   = 2
   vpc_id                  = aws_vpc.main.id
