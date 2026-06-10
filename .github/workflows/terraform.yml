@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository to the GitHub Actions runner
+    # 1. Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
 
-    # Install Terraform on the runner
+    # 2. Setup Terraform CLI
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    # Configure AWS credentials using the secrets you added
+    # 3. Configure AWS Credentials for the runner
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -29,14 +29,22 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    # Initialize Terraform and download plugins
+    # 4. Initialize Terraform and download provider plugins
     - name: Terraform Init
       run: terraform -chdir=infrastructure init
 
-    # Validate the configuration
+    # 5. Validate the configuration for syntax errors
     - name: Terraform Validate
       run: terraform -chdir=infrastructure validate
 
-    # Plan the changes
+    # 6. Run Checkov Security Scan to detect misconfigurations
+    - name: Run Checkov Security Scan
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: infrastructure
+        framework: terraform
+        quiet: true
+
+    # 7. Plan the changes to be applied
     - name: Terraform Plan
       run: terraform -chdir=infrastructure plan -input=false
