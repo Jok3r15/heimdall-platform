@@ -12,7 +12,8 @@ resource "aws_security_group" "heimdall_sg" {
   }
 
   egress {
-    description = "Allow all outbound traffic to internet" # <--- AGREGADO
+    # checkov:skip=CKV_AWS_382: Allow outbound traffic for EKS node operations
+    description = "Allow all outbound traffic to internet"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

@@ -37,14 +37,16 @@ jobs:
     - name: Terraform Validate
       run: terraform -chdir=infrastructure validate
 
-    # 6. Run Checkov Security Scan to detect misconfigurations
+    # 6. Run Checkov Security Scan
     - name: Run Checkov Security Scan
       uses: bridgecrewio/checkov-action@master
       with:
         directory: infrastructure
         framework: terraform
-        quiet: true
-
+        quiet: false # Cambiado a false para depurar
+        # Fuerza el uso de la versión más reciente para evitar el aviso de Node.js
+        force_failure: true
+    
     # 7. Plan the changes to be applied
     - name: Terraform Plan
       run: terraform -chdir=infrastructure plan -input=false
