@@ -9,9 +9,11 @@ on:
 
 jobs:
   terraform:
-    name: 'Terraform'
     runs-on: ubuntu-latest
-
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Añade esta línea bajo 'env'
+    steps:
+      ...
     steps:
     # 1. Checkout the repository to the GitHub Actions runner
     - name: Checkout
