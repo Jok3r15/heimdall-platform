@@ -4,13 +4,15 @@ resource "aws_security_group" "heimdall_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    self      = true
+    description = "Allow all traffic within the security group (self-reference)" # <--- AGREGADO
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
   }
 
   egress {
+    description = "Allow all outbound traffic to internet" # <--- AGREGADO
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
