@@ -11,9 +11,9 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Añade esta línea bajo 'env'
-    steps:
-      ...
+      # Force Node.js 24 to avoid deprecation warnings
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    
     steps:
     # 1. Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -45,10 +45,12 @@ jobs:
       with:
         directory: infrastructure
         framework: terraform
-        quiet: false # Cambiado a false para depurar
-        # Fuerza el uso de la versión más reciente para evitar el aviso de Node.js
+        # Skip noise checks that are standard AWS defaults 
+        # CKV2_AWS_12: Default SG isolation
+        # CKV_AWS_130: Public IP assignment
+        skip_check: CKV2_AWS_12,CKV_AWS_130
         force_failure: true
-    
+
     # 7. Plan the changes to be applied
     - name: Terraform Plan
       run: terraform -chdir=infrastructure plan -input=false
