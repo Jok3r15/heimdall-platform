@@ -13,5 +13,8 @@ resource "aws_eks_cluster" "main" {
 
 resource "aws_cloudwatch_log_group" "eks_logs" {
   name              = "/aws/eks/heimdall-cluster/cluster"
-  retention_in_days = 7
+  retention_in_days = 365 # Fixes CKV_AWS_338
+  
+  # Si Checkov sigue pidiendo KMS, puedes añadir esta línea:
+  # kms_key_id = <tu_arn_de_kms_opcional>
 }
