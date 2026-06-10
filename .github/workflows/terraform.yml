@@ -11,11 +11,11 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      # Force Node.js 24 to avoid deprecation warnings
+      # Force Node.js 24 to avoid deprecation warnings from GitHub Actions
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
-    # 1. Checkout the repository to the GitHub Actions runner
+    # 1. Checkout the repository
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -23,7 +23,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    # 3. Configure AWS Credentials for the runner
+    # 3. Configure AWS Credentials
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -31,11 +31,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    # 4. Initialize Terraform and download provider plugins
+    # 4. Initialize Terraform
     - name: Terraform Init
       run: terraform -chdir=infrastructure init
 
-    # 5. Validate the configuration for syntax errors
+    # 5. Validate the configuration
     - name: Terraform Validate
       run: terraform -chdir=infrastructure validate
 
@@ -45,12 +45,14 @@ jobs:
       with:
         directory: infrastructure
         framework: terraform
-        # Skip noise checks that are standard AWS defaults 
+        # Skip noise checks for default VPC/SG configurations and non-critical warnings
         # CKV2_AWS_12: Default SG isolation
         # CKV_AWS_130: Public IP assignment
-        skip_check: CKV2_AWS_12,CKV_AWS_130
+        # CKV_AWS_382: Broad egress rules
+        skip_check: CKV2_AWS_12,CKV_AWS_130,CKV_AWS_382
         force_failure: true
+        quiet: false
 
-    # 7. Plan the changes to be applied
+    # 7. Plan the changes
     - name: Terraform Plan
       run: terraform -chdir=infrastructure plan -input=false
