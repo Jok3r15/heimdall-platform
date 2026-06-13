@@ -55,22 +55,28 @@ resource "aws_s3_bucket_versioning" "heimdall_data" {
   }
 }
 
-# Cifrado AES256 por defecto (Cumplimiento CKV_AWS_145)
+# Cifrado KMS estricto (Resuelve CKV_AWS_145)
 resource "aws_s3_bucket_server_side_encryption_configuration" "heimdall_data" {
   bucket = aws_s3_bucket.heimdall_data.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm = "aws:kms"
     }
   }
 }
 
-# Ciclo de vida (Cumplimiento CKV2_AWS_61)
+# Ciclo de vida completo (Resuelve CKV2_AWS_61 y CKV_AWS_300)
 resource "aws_s3_bucket_lifecycle_configuration" "heimdall_data" {
   bucket = aws_s3_bucket.heimdall_data.id
   rule {
     id     = "log-cleanup"
     status = "Enabled"
+    
+    # Regla para abortar subidas fallidas (Resuelve CKV_AWS_300)
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
     noncurrent_version_expiration {
       noncurrent_days = 30
     }
