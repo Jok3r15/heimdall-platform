@@ -1,4 +1,4 @@
-# main.tf - Root module configuration
+# main.tf - Root module configuration (Security Hardened)
 
 # Data to retrieve the AWS Account ID
 data "aws_caller_identity" "current" {}
@@ -26,7 +26,7 @@ module "eks_nodes" {
   security_group_id = module.security_groups.security_group_id
 }
 
-# 2. S3 Bucket for secure access testing
+# 2. S3 Bucket for secure access testing (Compliant)
 resource "aws_s3_bucket" "heimdall_data" {
   bucket = "heimdall-secure-data-${data.aws_caller_identity.current.account_id}"
 
@@ -35,11 +35,38 @@ resource "aws_s3_bucket" "heimdall_data" {
   }
 }
 
+# Bloquear acceso público (Cumplimiento CKV2_AWS_6)
+resource "aws_s3_bucket_public_access_block" "heimdall_data" {
+  bucket = aws_s3_bucket.heimdall_data.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Habilitar versionado (Cumplimiento CKV_AWS_21)
+resource "aws_s3_bucket_versioning" "heimdall_data" {
+  bucket = aws_s3_bucket.heimdall_data.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Cifrado AES256 por defecto (Cumplimiento CKV_AWS_145)
+resource "aws_s3_bucket_server_side_encryption_configuration" "heimdall_data" {
+  bucket = aws_s3_bucket.heimdall_data.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 # 3. IAM Role for Kubernetes ServiceAccount (IRSA)
 resource "aws_iam_role" "s3_read_role" {
   name = "heimdall-s3-read-role"
 
-  # Trust policy allowing OIDC provider to assume this role
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -59,7 +86,7 @@ resource "aws_iam_role" "s3_read_role" {
   })
 }
 
-# 4. IAM Policy with read and write permissions for the bucket
+# 4. IAM Policy
 resource "aws_iam_policy" "s3_read_policy" {
   name = "heimdall-s3-read-policy"
   policy = jsonencode({
@@ -77,7 +104,7 @@ resource "aws_iam_policy" "s3_read_policy" {
   })
 }
 
-# 5. Attach the policy to the role
+# 5. Attach policy
 resource "aws_iam_role_policy_attachment" "s3_read_attach" {
   role       = aws_iam_role.s3_read_role.name
   policy_arn = aws_iam_policy.s3_read_policy.arn
