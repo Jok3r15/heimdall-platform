@@ -8,3 +8,8 @@ variable "cluster_name" {
   description = "The name of the EKS cluster to join"
   type        = string
 }
+
+variable "security_group_id" {
+  description = "The security group ID for the EKS node group"
+  type        = string
+}

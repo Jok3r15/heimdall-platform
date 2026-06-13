@@ -3,8 +3,10 @@
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/heimdall-cluster/cluster"
   retention_in_days = 365
-  kms_key_id        = aws_kms_key.eks_secrets.arn
-
+  
+  # Eliminamos la referencia a kms_key_id aquí para evitar el error de permisos 
+  # durante el despliegue automático del Log Group.
+  
   tags = {
     Name = "heimdall-eks-logs"
   }
