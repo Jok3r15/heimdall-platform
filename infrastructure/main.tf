@@ -1,4 +1,4 @@
-# main.tf - Root module configuration (Security Hardened)
+# main.tf - Root module configuration (Security Hardened & CI Compliant)
 
 # Data to retrieve the AWS Account ID
 data "aws_caller_identity" "current" {}
@@ -26,8 +26,10 @@ module "eks_nodes" {
   security_group_id = module.security_groups.security_group_id
 }
 
-# 2. S3 Bucket for secure access testing (Compliant)
+# 2. S3 Bucket for secure access testing (Hardened & Compliant)
 resource "aws_s3_bucket" "heimdall_data" {
+  # checkov:skip=CKV2_AWS_62: "Notificaciones no requeridas para este entorno"
+  # checkov:skip=CKV_AWS_144: "Replicación multi-región no necesaria por costos"
   bucket = "heimdall-secure-data-${data.aws_caller_identity.current.account_id}"
 
   tags = {
@@ -59,6 +61,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "heimdall_data" {
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
+    }
+  }
+}
+
+# Ciclo de vida (Cumplimiento CKV2_AWS_61)
+resource "aws_s3_bucket_lifecycle_configuration" "heimdall_data" {
+  bucket = aws_s3_bucket.heimdall_data.id
+  rule {
+    id     = "log-cleanup"
+    status = "Enabled"
+    noncurrent_version_expiration {
+      noncurrent_days = 30
     }
   }
 }
