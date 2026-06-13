@@ -3,12 +3,10 @@ resource "aws_eks_cluster" "main" {
   name     = "heimdall-cluster"
   role_arn = aws_iam_role.eks_cluster.arn
 
-  # VPC configuration:
-  # Habilitamos el acceso público para poder gestionar el clúster con kubectl desde tu local.
-  # Mantenemos el acceso privado para que los nodos y servicios internos se comuniquen de forma segura.
+  # VPC configuration
   vpc_config {
     subnet_ids              = var.subnet_ids
-    endpoint_public_access  = true  # <-- CAMBIADO A TRUE
+    endpoint_public_access  = true 
     endpoint_private_access = true
   }
 
@@ -33,4 +31,16 @@ resource "aws_kms_key" "eks_secrets" {
   tags = {
     Name = "heimdall-eks-kms-key"
   }
+}
+
+# Data para obtener el certificado del clúster (necesario para el OIDC provider)
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+# OIDC Provider para habilitar IRSA (IAM Roles for Service Accounts)
+resource "aws_iam_openid_connect_provider" "eks_oidc" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
 }
